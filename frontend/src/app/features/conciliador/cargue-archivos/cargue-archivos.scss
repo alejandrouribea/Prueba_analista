@@ -1,0 +1,146 @@
+.cargue {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sutil);
+  padding: 1.5rem;
+
+  &__encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+
+    h2 {
+      font-size: 1.05rem;
+    }
+  }
+
+  &__ayuda {
+    margin-top: 0.25rem;
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    max-width: 70ch;
+  }
+
+  &__ranuras {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  &__error {
+    margin-top: 1rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radio-sm);
+    background: var(--alerta-suave);
+    color: var(--alerta);
+    font-size: 0.9rem;
+    border-left: 3px solid var(--alerta);
+  }
+
+  &__acciones {
+    margin-top: 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* Ranura de archivo */
+
+.ranura {
+  display: flex;
+  gap: 0.9rem;
+  padding: 1.1rem;
+  border: 2px dashed var(--borde-fuerte);
+  border-radius: var(--radio);
+  background: var(--superficie-alterna);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &--activa {
+    border-color: var(--marca);
+    background: var(--marca-suave);
+  }
+
+  &--cargada {
+    border-style: solid;
+    border-color: var(--exito);
+  }
+
+  &__icono {
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    font-size: 1.1rem;
+    color: var(--texto-tenue);
+  }
+
+  &--cargada &__icono {
+    background: var(--exito-suave);
+    color: var(--exito);
+    border-color: transparent;
+  }
+
+  &__cuerpo {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  &__titulo {
+    font-weight: 600;
+    font-family: var(--fuente-mono);
+    font-size: 0.9rem;
+  }
+
+  &__descripcion {
+    color: var(--texto-tenue);
+    font-size: 0.82rem;
+  }
+
+  &__archivo {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+    color: var(--texto);
+  }
+
+  &__peso {
+    color: var(--texto-tenue);
+  }
+
+  &__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__arrastrar {
+    font-size: 0.78rem;
+    color: var(--texto-tenue);
+  }
+
+  label.boton {
+    cursor: pointer;
+    position: relative;
+    padding-block: 0.4rem;
+    font-size: 0.88rem;
+
+    &:focus-within {
+      outline: 2px solid var(--marca);
+      outline-offset: 2px;
+    }
+  }
+}

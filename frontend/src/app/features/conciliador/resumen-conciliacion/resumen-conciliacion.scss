@@ -1,0 +1,231 @@
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &__encabezado h2 {
+    font-size: 1.05rem;
+  }
+
+  &__marca {
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--texto-tenue);
+  }
+
+  &__tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.9rem;
+  }
+
+  &__avance {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 1rem 1.2rem;
+  }
+
+  &__columnas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+}
+
+/* Tarjetas de indicadores */
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-top: 3px solid var(--borde-fuerte);
+  border-radius: var(--radio);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--sombra-sutil);
+
+  &[data-tono='exito'] { border-top-color: var(--exito); }
+  &[data-tono='alerta'] { border-top-color: var(--alerta); }
+  &[data-tono='aviso'] { border-top-color: var(--aviso); }
+  &[data-tono='neutro'] { border-top-color: var(--marca); }
+
+  &__etiqueta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--texto-tenue);
+  }
+
+  &__valor {
+    margin-top: 0.2rem;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &[data-tono='exito'] .tarjeta__valor { color: var(--exito); }
+  &[data-tono='alerta'] .tarjeta__valor { color: var(--alerta); }
+  &[data-tono='aviso'] .tarjeta__valor { color: var(--aviso); }
+
+  &__detalle {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--texto-tenue);
+  }
+}
+
+/* Barra de avance */
+
+.avance {
+  &__barra {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--alerta-suave);
+    overflow: hidden;
+  }
+
+  &__relleno {
+    display: block;
+    height: 100%;
+    background: var(--exito);
+    transition: width 0.3s ease;
+  }
+
+  &__leyenda {
+    margin-top: 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+
+  &__severidades {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-left: 0.25rem;
+  }
+}
+
+/* Paneles */
+
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem 1.2rem;
+  box-shadow: var(--sombra-sutil);
+
+  &__titulo {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__ayuda,
+  &__vacio,
+  &__nota {
+    font-size: 0.82rem;
+    color: var(--texto-tenue);
+  }
+
+  &__nota {
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--borde);
+  }
+}
+
+/* Montos */
+
+.montos {
+  margin: 0;
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.42rem 0;
+    border-bottom: 1px dashed var(--borde);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    dt {
+      color: var(--texto-suave);
+      font-size: 0.88rem;
+    }
+
+    dd {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    &--destacada {
+      dt { color: var(--texto); font-weight: 500; }
+      dd { color: var(--alerta); }
+    }
+  }
+}
+
+/* Listado de reglas */
+
+.reglas {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &__boton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: var(--radio-sm);
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    color: var(--texto);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--superficie-alterna);
+      border-color: var(--borde);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--marca);
+      outline-offset: 1px;
+    }
+  }
+
+  &__nombre {
+    font-size: 0.88rem;
+  }
+
+  &__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  &__cantidad {
+    min-width: 1.9rem;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+}

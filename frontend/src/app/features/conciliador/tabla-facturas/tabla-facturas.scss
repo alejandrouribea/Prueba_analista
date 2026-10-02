@@ -1,0 +1,265 @@
+.detalle {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sutil);
+  padding: 1.25rem 1.25rem 1.5rem;
+
+  &__encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h2 { font-size: 1.05rem; }
+  }
+
+  &__contador {
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--texto-tenue);
+  }
+
+  &__vacio {
+    margin-top: 1.25rem;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--texto-suave);
+    border: 1px dashed var(--borde-fuerte);
+    border-radius: var(--radio);
+  }
+}
+
+/* Filtros */
+
+.filtros {
+  margin-top: 1.1rem;
+  padding: 0.9rem 1rem;
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.85rem;
+
+  &__grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 150px;
+
+    &--ancho { flex: 1; min-width: 220px; }
+  }
+
+  &__etiqueta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-tenue);
+  }
+}
+
+/* Tabla */
+
+.tabla__contenedor {
+  margin-top: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--superficie-alterna);
+    text-align: left;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-tenue);
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--borde-fuerte);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--borde);
+    vertical-align: top;
+  }
+
+  &__fila {
+    &:hover { background: var(--superficie-alterna); }
+
+    &[data-tono='alerta'] { box-shadow: inset 3px 0 0 var(--alerta); }
+    &[data-tono='aviso'] { box-shadow: inset 3px 0 0 var(--aviso); }
+    &[data-tono='exito'] { box-shadow: inset 3px 0 0 var(--exito); }
+  }
+
+  &__numero {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__total { font-weight: 600; }
+
+  &__tarifa {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--texto-tenue);
+  }
+
+  &__id {
+    font-family: var(--fuente-mono);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__concepto,
+  &__causa {
+    max-width: 220px;
+    min-width: 140px;
+  }
+
+  &__causa {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+
+  &__expandir { width: 2.2rem; }
+
+  &__detalle > td {
+    background: var(--superficie-alterna);
+    padding: 1rem 1.2rem;
+  }
+}
+
+.expandir {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--texto-suave);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover { border-color: var(--marca); color: var(--marca); }
+  &:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
+}
+
+/* Desglose de una factura */
+
+.desglose {
+  /* Trazabilidad y hallazgos comparten la primera fila; los registros
+     contables (7 columnas) ocupan una fila completa debajo. */
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 1.25rem 1.75rem;
+
+  /* `min-width: 0` evita que las tablas internas estiren la columna del grid;
+     el remanente se resuelve con scroll dentro del bloque. */
+  &__bloque {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  &__bloque:last-child {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__titulo {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-tenue);
+    margin-bottom: 0.5rem;
+  }
+
+  &__ok { font-size: 0.85rem; color: var(--exito); }
+  &__alerta { font-size: 0.85rem; color: var(--alerta); }
+}
+
+.comparativa {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--borde);
+    text-align: left;
+  }
+
+  thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--texto-tenue);
+  }
+
+  tbody th {
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .diferencia {
+    color: var(--alerta);
+    font-weight: 700;
+  }
+}
+
+.hallazgos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  &__item {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+
+  &__nombre {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  &__mensaje {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+  }
+}
+
+/* Huérfanos */
+
+.huerfanos {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--borde);
+
+  &__titulo {
+    font-size: 0.95rem;
+    color: var(--alerta);
+  }
+}

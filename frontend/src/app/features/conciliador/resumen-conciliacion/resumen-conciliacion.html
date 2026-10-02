@@ -1,0 +1,114 @@
+<section class="resumen" aria-labelledby="titulo-resumen">
+  <header class="resumen__encabezado">
+    <div>
+      <h2 id="titulo-resumen">2. Resumen de la conciliación</h2>
+      @if (fechaProceso(); as fecha) {
+        <p class="resumen__marca">Procesado el {{ fecha }}</p>
+      }
+    </div>
+  </header>
+
+  <div class="resumen__tarjetas">
+    @for (tarjeta of tarjetas(); track tarjeta.clave) {
+      <article class="tarjeta" [attr.data-tono]="tarjeta.tono">
+        <p class="tarjeta__etiqueta">{{ tarjeta.etiqueta }}</p>
+        <p class="tarjeta__valor">{{ tarjeta.valor }}</p>
+        <p class="tarjeta__detalle">{{ tarjeta.detalle }}</p>
+      </article>
+    }
+  </div>
+
+  <div class="resumen__avance">
+    <div class="avance__barra" role="img"
+         [attr.aria-label]="'Facturas correctas: ' + resumen().porcentaje_correctas + ' por ciento'">
+      <span class="avance__relleno" [style.width.%]="anchoCorrectas()"></span>
+    </div>
+    <p class="avance__leyenda">
+      <strong>{{ resumen().facturas_correctas }}</strong> correctas ·
+      <strong>{{ resumen().facturas_con_inconsistencia }}</strong> con inconsistencia
+      @if (severidades().length) {
+        <span class="avance__severidades">
+          @for (s of severidades(); track s.nivel) {
+            <span class="chip chip--severidad" [attr.data-severidad]="s.nivel">
+              Severidad {{ s.nivel }}: {{ s.cantidad }}
+            </span>
+          }
+        </span>
+      }
+    </p>
+  </div>
+
+  <div class="resumen__columnas">
+    <article class="panel">
+      <h3 class="panel__titulo">Impacto económico</h3>
+      <dl class="montos">
+        <div class="montos__fila">
+          <dt>Total facturado</dt>
+          <dd>{{ resumen().montos.total_facturado | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila">
+          <dt>Base gravable</dt>
+          <dd>{{ resumen().montos.total_base_gravable | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila">
+          <dt>IVA facturado</dt>
+          <dd>{{ resumen().montos.total_iva | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila">
+          <dt>Retenciones practicadas</dt>
+          <dd>{{ resumen().montos.total_retencion | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila">
+          <dt>Valor contabilizado</dt>
+          <dd>{{ resumen().montos.total_contabilizado | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila montos__fila--destacada">
+          <dt>Monto en facturas con inconsistencia</dt>
+          <dd>{{ resumen().montos.monto_con_inconsistencia | monedaCop }}</dd>
+        </div>
+        <div class="montos__fila montos__fila--destacada">
+          <dt>Diferencias detectadas (valor absoluto)</dt>
+          <dd>{{ resumen().montos.diferencia_absoluta_detectada | monedaCop }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <h3 class="panel__titulo">Inconsistencias por regla</h3>
+      @if (resumen().por_regla.length) {
+        <p class="panel__ayuda">Seleccione una regla para filtrar el detalle.</p>
+        <ul class="reglas">
+          @for (regla of resumen().por_regla; track regla.codigo) {
+            <li class="reglas__item">
+              <button
+                type="button"
+                class="reglas__boton"
+                (click)="filtrarPorRegla.emit(regla.codigo)"
+                [title]="'Categoría: ' + regla.categoria + ' · Filtrar el detalle por esta regla'"
+              >
+                <span class="reglas__nombre">{{ regla.nombre }}</span>
+                <span class="reglas__meta">
+                  <span class="chip chip--severidad" [attr.data-severidad]="regla.severidad">
+                    {{ regla.severidad }}
+                  </span>
+                  <span class="reglas__cantidad">{{ regla.cantidad }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="panel__vacio">
+          No se encontraron inconsistencias: todas las facturas cruzan correctamente.
+        </p>
+      }
+
+      @if (resumen().registros_contables_sin_factura > 0) {
+        <p class="panel__nota">
+          Además, {{ resumen().registros_contables_sin_factura }} registro(s) contable(s)
+          no tienen factura soporte en facturas.csv.
+        </p>
+      }
+    </article>
+  </div>
+</section>

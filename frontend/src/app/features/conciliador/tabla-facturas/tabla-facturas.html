@@ -1,0 +1,334 @@
+<section class="detalle" aria-labelledby="titulo-detalle">
+  <header class="detalle__encabezado">
+    <div>
+      <h2 id="titulo-detalle">3. Detalle de facturas</h2>
+      <p class="detalle__contador">
+        Mostrando <strong>{{ totalFiltradas() }}</strong> de
+        <strong>{{ totalGeneral() }}</strong> facturas
+      </p>
+    </div>
+    <button
+      type="button"
+      class="boton boton--secundario"
+      (click)="exportar()"
+      [disabled]="totalFiltradas() === 0"
+    >
+      Exportar a CSV
+    </button>
+  </header>
+
+  <div class="filtros">
+    <div class="filtros__grupo">
+      <label class="filtros__etiqueta" for="filtro-estado">Estado</label>
+      <select
+        id="filtro-estado"
+        class="campo"
+        [ngModel]="filtroClasificacion()"
+        (ngModelChange)="filtroClasificacion.set($event)"
+      >
+        @for (opcion of opcionesClasificacion; track opcion.valor) {
+          <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtros__grupo">
+      <label class="filtros__etiqueta" for="filtro-severidad">Severidad</label>
+      <select
+        id="filtro-severidad"
+        class="campo"
+        [ngModel]="filtroSeveridad()"
+        (ngModelChange)="filtroSeveridad.set($event)"
+      >
+        @for (opcion of opcionesSeveridad; track opcion.valor) {
+          <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtros__grupo filtros__grupo--ancho">
+      <label class="filtros__etiqueta" for="filtro-regla">Tipo de inconsistencia</label>
+      <select
+        id="filtro-regla"
+        class="campo"
+        [ngModel]="filtroRegla()"
+        (ngModelChange)="filtroRegla.set($event)"
+      >
+        <option value="todas">Todas</option>
+        @for (regla of reglasDisponibles(); track regla.codigo) {
+          <option [value]="regla.codigo">{{ regla.nombre }} ({{ regla.cantidad }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtros__grupo filtros__grupo--ancho">
+      <label class="filtros__etiqueta" for="filtro-busqueda">Buscar</label>
+      <input
+        id="filtro-busqueda"
+        type="search"
+        class="campo"
+        placeholder="Número de factura, NIT o concepto"
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    @if (hayFiltrosActivos()) {
+      <button type="button" class="boton boton--enlace" (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    }
+  </div>
+
+  @if (totalFiltradas() === 0) {
+    <p class="detalle__vacio">
+      Ninguna factura coincide con los filtros seleccionados.
+      @if (hayFiltrosActivos()) {
+        <button type="button" class="boton boton--enlace" (click)="limpiarFiltros()">
+          Ver todas
+        </button>
+      }
+    </p>
+  } @else {
+    <div class="tabla__contenedor">
+      <table class="tabla">
+        <caption class="visualmente-oculto">
+          Detalle de facturas conciliadas con su clasificación y causas
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" class="tabla__expandir"><span class="visualmente-oculto">Expandir</span></th>
+            <th scope="col">Factura</th>
+            <th scope="col">NIT</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Concepto</th>
+            <th scope="col" class="tabla__numero">Base gravable</th>
+            <th scope="col" class="tabla__numero">IVA</th>
+            <th scope="col" class="tabla__numero">Retención</th>
+            <th scope="col" class="tabla__numero">Total</th>
+            <th scope="col">Estado contable</th>
+            <th scope="col">Clasificación</th>
+            <th scope="col">Causa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (factura of facturas(); track factura.fila) {
+            <tr class="tabla__fila" [attr.data-tono]="tonoFila(factura)">
+              <td class="tabla__expandir">
+                <button
+                  type="button"
+                  class="expandir"
+                  (click)="alternar(factura)"
+                  [attr.aria-expanded]="estaExpandida(factura)"
+                  [attr.aria-label]="
+                    (estaExpandida(factura) ? 'Ocultar' : 'Ver') +
+                    ' el detalle de la factura ' + factura.id_factura
+                  "
+                >
+                  {{ estaExpandida(factura) ? '−' : '+' }}
+                </button>
+              </td>
+              <td class="tabla__id">
+                {{ factura.id_factura }}
+                @if (factura.total_ocurrencias > 1) {
+                  <span class="chip chip--duplicado"
+                        [title]="'Ocurrencia ' + factura.ocurrencia + ' de ' + factura.total_ocurrencias">
+                    {{ factura.ocurrencia }}/{{ factura.total_ocurrencias }}
+                  </span>
+                }
+              </td>
+              <td>{{ factura.nit_proveedor ?? '—' }}</td>
+              <td>{{ factura.fecha_factura ?? '—' }}</td>
+              <td class="tabla__concepto">{{ factura.concepto ?? '—' }}</td>
+              <td class="tabla__numero">{{ factura.base_gravable | monedaCop }}</td>
+              <td class="tabla__numero">
+                {{ factura.valor_iva | monedaCop }}
+                <span class="tabla__tarifa">{{ factura.tarifa_iva | tarifa }}</span>
+              </td>
+              <td class="tabla__numero">
+                {{ factura.valor_retencion | monedaCop }}
+                <span class="tabla__tarifa">{{ factura.tarifa_retencion | tarifa }}</span>
+              </td>
+              <td class="tabla__numero tabla__total">{{ factura.total_factura | monedaCop }}</td>
+              <td>
+                <span class="chip" [attr.data-estado]="factura.contabilizada ? 'ok' : 'pendiente'">
+                  {{ factura.estado_contable ?? 'Sin registro' }}
+                </span>
+              </td>
+              <td>
+                <span class="chip chip--clasificacion" [attr.data-tono]="tonoFila(factura)">
+                  {{ factura.clasificacion }}
+                </span>
+              </td>
+              <td class="tabla__causa">{{ factura.causas ?? '—' }}</td>
+            </tr>
+
+            @if (estaExpandida(factura)) {
+              <tr class="tabla__detalle">
+                <td colspan="12">
+                  <div class="desglose">
+                    <div class="desglose__bloque">
+                      <h4 class="desglose__titulo">Trazabilidad del cálculo</h4>
+                      <table class="comparativa">
+                        <thead>
+                          <tr>
+                            <th scope="col">Concepto</th>
+                            <th scope="col" class="tabla__numero">Reportado</th>
+                            <th scope="col" class="tabla__numero">Esperado</th>
+                            <th scope="col" class="tabla__numero">Diferencia</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row">
+                              IVA (base × {{ factura.tarifa_iva | tarifa }})
+                            </th>
+                            <td class="tabla__numero">{{ factura.valor_iva | monedaCop }}</td>
+                            <td class="tabla__numero">{{ factura.iva_esperado | monedaCop }}</td>
+                            <td class="tabla__numero"
+                                [class.diferencia]="(factura.diferencia_iva ?? 0) !== 0">
+                              {{ factura.diferencia_iva | monedaCop }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th scope="row">
+                              Retención (base × {{ factura.tarifa_retencion | tarifa }})
+                            </th>
+                            <td class="tabla__numero">{{ factura.valor_retencion | monedaCop }}</td>
+                            <td class="tabla__numero">{{ factura.retencion_esperada | monedaCop }}</td>
+                            <td class="tabla__numero"
+                                [class.diferencia]="(factura.diferencia_retencion ?? 0) !== 0">
+                              {{ factura.diferencia_retencion | monedaCop }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Total (base + IVA − retención)</th>
+                            <td class="tabla__numero">{{ factura.total_factura | monedaCop }}</td>
+                            <td class="tabla__numero">{{ factura.total_esperado | monedaCop }}</td>
+                            <td class="tabla__numero"
+                                [class.diferencia]="(factura.diferencia_total ?? 0) !== 0">
+                              {{ factura.diferencia_total | monedaCop }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Valor contabilizado</th>
+                            <td class="tabla__numero">{{ factura.valor_contabilizado | monedaCop }}</td>
+                            <td class="tabla__numero">{{ factura.total_factura | monedaCop }}</td>
+                            <td class="tabla__numero"
+                                [class.diferencia]="(factura.diferencia_contable ?? 0) !== 0">
+                              {{ factura.diferencia_contable | monedaCop }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="desglose__bloque">
+                      <h4 class="desglose__titulo">
+                        Hallazgos ({{ factura.hallazgos.length }})
+                      </h4>
+                      @if (factura.hallazgos.length) {
+                        <ul class="hallazgos">
+                          @for (hallazgo of factura.hallazgos; track hallazgo.codigo) {
+                            <li class="hallazgos__item">
+                              <span class="chip chip--severidad"
+                                    [attr.data-severidad]="hallazgo.severidad">
+                                {{ hallazgo.severidad }}
+                              </span>
+                              <div>
+                                <p class="hallazgos__nombre">{{ hallazgo.nombre }}</p>
+                                <p class="hallazgos__mensaje">{{ hallazgo.mensaje }}</p>
+                              </div>
+                            </li>
+                          }
+                        </ul>
+                      } @else {
+                        <p class="desglose__ok">
+                          La factura cumple todas las reglas de validación.
+                        </p>
+                      }
+                    </div>
+
+                    <div class="desglose__bloque">
+                      <h4 class="desglose__titulo">
+                        Registros contables ({{ factura.registros_contables.length }})
+                      </h4>
+                      @if (factura.registros_contables.length) {
+                        <table class="comparativa">
+                          <thead>
+                            <tr>
+                              <th scope="col">Fila</th>
+                              <th scope="col">Fecha</th>
+                              <th scope="col">Cuenta</th>
+                              <th scope="col">Centro de costo</th>
+                              <th scope="col" class="tabla__numero">Débito</th>
+                              <th scope="col" class="tabla__numero">Crédito</th>
+                              <th scope="col">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (registro of factura.registros_contables; track registro.fila) {
+                              <tr>
+                                <td>{{ registro.fila }}</td>
+                                <td>{{ registro.fecha_contabilizacion ?? '—' }}</td>
+                                <td>{{ registro.cuenta_contable ?? '—' }}</td>
+                                <td>{{ registro.centro_costo ?? '—' }}</td>
+                                <td class="tabla__numero">{{ registro.valor_debito | monedaCop }}</td>
+                                <td class="tabla__numero">{{ registro.valor_credito | monedaCop }}</td>
+                                <td>{{ registro.estado ?? '—' }}</td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      } @else {
+                        <p class="desglose__alerta">
+                          Esta factura no tiene ningún movimiento en contabilidad.csv.
+                        </p>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (huerfanos().length) {
+    <div class="huerfanos">
+      <h3 class="huerfanos__titulo">
+        Registros contables sin factura soporte ({{ huerfanos().length }})
+      </h3>
+      <div class="tabla__contenedor">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Factura</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Cuenta</th>
+              <th scope="col">Centro de costo</th>
+              <th scope="col" class="tabla__numero">Débito</th>
+              <th scope="col" class="tabla__numero">Crédito</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (registro of huerfanos(); track registro.fila) {
+              <tr>
+                <td>{{ registro.id_factura }}</td>
+                <td>{{ registro.fecha_contabilizacion ?? '—' }}</td>
+                <td>{{ registro.cuenta_contable ?? '—' }}</td>
+                <td>{{ registro.centro_costo ?? '—' }}</td>
+                <td class="tabla__numero">{{ registro.valor_debito | monedaCop }}</td>
+                <td class="tabla__numero">{{ registro.valor_credito | monedaCop }}</td>
+                <td>{{ registro.estado ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>

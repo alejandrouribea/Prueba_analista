@@ -1,0 +1,91 @@
+<div class="pagina">
+  <header class="cabecera">
+    <div class="cabecera__contenido">
+      <div>
+        <h1 class="cabecera__titulo">Conciliador de facturas y retenciones</h1>
+        <p class="cabecera__bajada">
+          Cruce automático entre las facturas de proveedores y los registros
+          contabilizados del periodo, con validación de IVA, retenciones,
+          duplicados y facturas sin causar.
+        </p>
+      </div>
+      @if (resultado()) {
+        <button type="button" class="boton boton--sutil" (click)="reiniciar()">
+          Nueva conciliación
+        </button>
+      }
+    </div>
+  </header>
+
+  <main class="contenido">
+    @if (backendDisponible() === false) {
+      <div class="alerta alerta--aviso" role="status">
+        <div>
+          <p class="alerta__titulo">No se detecta el backend</p>
+          <p class="alerta__texto">
+            La API de Python no responde. Inicie el backend con
+            <code>uvicorn app.main:app --reload --port 8000</code> y vuelva a intentar.
+          </p>
+        </div>
+        <button type="button" class="boton boton--sutil" (click)="verificarBackend()">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- Paso 1: cargue -->
+    <app-cargue-archivos [procesando]="cargando()" (procesar)="procesar($event)" />
+
+    @if (cargando()) {
+      <div class="alerta alerta--info" role="status" aria-live="polite">
+        <span class="spinner spinner--grande" aria-hidden="true"></span>
+        <div>
+          <p class="alerta__titulo">Procesando la conciliación</p>
+          <p class="alerta__texto">
+            Leyendo los archivos y aplicando las reglas de validación…
+          </p>
+        </div>
+      </div>
+    }
+
+    @if (error(); as fallo) {
+      <div class="alerta alerta--error" role="alert">
+        <div>
+          <p class="alerta__titulo">No fue posible procesar los archivos</p>
+          <p class="alerta__texto">{{ fallo.message }}</p>
+          <p class="alerta__codigo">Código: {{ fallo.codigo }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Resultados -->
+    @if (resumen(); as datos) {
+      <app-resumen-conciliacion
+        [resumen]="datos"
+        [procesadoEn]="resultado()?.procesado_en ?? null"
+        (filtrarPorRegla)="filtrarPorRegla($event)"
+      />
+
+      @if (archivosProcesados().length) {
+        <p class="procesados">
+          Archivos procesados:
+          @for (archivo of archivosProcesados(); track archivo.nombre; let ultimo = $last) {
+            <span class="procesados__item">
+              <strong>{{ archivo.nombre }}</strong> ({{ archivo.filas }} filas)</span
+            >{{ ultimo ? '' : ' · ' }}
+          }
+        </p>
+      }
+
+      <app-tabla-facturas />
+    } @else if (!cargando() && !error()) {
+      <div class="vacio">
+        <p class="vacio__titulo">Aún no hay resultados</p>
+        <p class="vacio__texto">
+          Cargue los dos archivos CSV y ejecute el procesamiento para ver el
+          resumen y el detalle de las inconsistencias.
+        </p>
+      </div>
+    }
+  </main>
+

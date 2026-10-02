@@ -1,0 +1,88 @@
+<section class="cargue" aria-labelledby="titulo-cargue">
+  <header class="cargue__encabezado">
+    <div>
+      <h2 id="titulo-cargue">1. Cargue de archivos</h2>
+      <p class="cargue__ayuda">
+        Seleccione el archivo de facturas de proveedores y el de registros
+        contables del periodo. Ambos en formato CSV.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="boton boton--sutil"
+      (click)="usarArchivosDeEjemplo()"
+      [disabled]="procesando() || cargandoEjemplo()"
+    >
+      {{ cargandoEjemplo() ? 'Cargando…' : 'Usar archivos de ejemplo' }}
+    </button>
+  </header>
+
+  <div class="cargue__ranuras">
+    @for (ranura of ranuras(); track ranura.id) {
+      <div
+        class="ranura"
+        [class.ranura--activa]="ranuraActiva() === ranura.id"
+        [class.ranura--cargada]="ranura.archivo !== null"
+        (dragover)="alArrastrar($event, ranura.id)"
+        (dragleave)="alSalir($event)"
+        (drop)="alSoltar($event, ranura.id)"
+      >
+        <div class="ranura__icono" aria-hidden="true">
+          @if (ranura.archivo) { ✓ } @else { ⇪ }
+        </div>
+
+        <div class="ranura__cuerpo">
+          <p class="ranura__titulo">{{ ranura.titulo }}</p>
+          <p class="ranura__descripcion">{{ ranura.descripcion }}</p>
+
+          @if (ranura.archivo; as archivo) {
+            <p class="ranura__archivo" [title]="archivo.name">
+              {{ archivo.name }}
+              <span class="ranura__peso">({{ formatearTamano(archivo.size) }})</span>
+            </p>
+            <button
+              type="button"
+              class="boton boton--enlace"
+              (click)="quitar(ranura.id)"
+              [disabled]="procesando()"
+            >
+              Quitar
+            </button>
+          } @else {
+            <label class="boton boton--secundario">
+              Seleccionar archivo
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                class="ranura__input"
+                [disabled]="procesando()"
+                (change)="alSeleccionar($event, ranura.id)"
+              />
+            </label>
+            <p class="ranura__arrastrar">o arrastre el archivo aquí</p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (errorLocal(); as mensaje) {
+    <p class="cargue__error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="cargue__acciones">
+    <button
+      type="button"
+      class="boton boton--primario"
+      (click)="enviar()"
+      [disabled]="!listoParaProcesar()"
+    >
+      @if (procesando()) {
+        <span class="spinner" aria-hidden="true"></span>
+        Procesando…
+      } @else {
+        Procesar conciliación
+      }
+    </button>
+  </div>
+</section>
